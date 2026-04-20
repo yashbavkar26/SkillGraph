@@ -1,0 +1,9 @@
+{
+  "mode": "auto",
+  "intensity": "fast",
+  "workflow": {
+    "research": true,
+    "requirements": true,
+    "roadmap": true
+  }
+}
