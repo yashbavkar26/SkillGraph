@@ -1,16 +1,16 @@
 # Roadmap: SkillGraph
 
-## Phase 1: Foundation (Core Graph & Identity)
+## Phase 1: Foundation (Core Graph & Identity) ✅ Complete (2026-04-21)
 *Goal: Establish the basic graph structure and user identity.*
-- [ ] Define core graph schema (User, Skill, Relationship).
-- [ ] Implement Graph Database (e.g., Neo4j) setup.
-- [ ] Develop basic API for User and Skill management.
-- [ ] Implement basic User Profile creation.
+- [x] Define core graph schema (User, Skill, Relationship).
+- [x] Implement Graph Database (e.g., Neo4j) setup.
+- [x] Develop basic API for User and Skill management.
+- [x] Implement basic User Profile creation.
 
-**Plans:** 3 plans
-- [ ] 01-01-PLAN.md — Infrastructure & Schema
-- [ ] 01-02-PLAN.md — Core Entity APIs
-- [ ] 01-03-PLAN.md — Relationship & Integration
+**Plans:** 3 plans — all complete
+- [x] 01-01-PLAN.md — Infrastructure & Schema
+- [x] 02-02-PLAN.md — Core Entity APIs
+- [x] 03-03-PLAN.md — Relationship & Integration
 
 ## Phase 2: Evidence & Peer Endorsement
 *Goal: Enable users to build their profile with verifiable data.*
