@@ -99,4 +99,28 @@ export const SkillModel = {
       await session.close();
     }
   },
+
+  /**
+   * List all skills ordered by creation time.
+   */
+  async list(): Promise<Skill[]> {
+    const session = getDriver().session();
+    try {
+      const result = await session.run(
+        'MATCH (s:Skill) RETURN s ORDER BY s.createdAt DESC'
+      );
+
+      return result.records.map((record) => {
+        const node = record.get('s').properties;
+        return {
+          id: node.id,
+          name: node.name,
+          category: node.category ?? undefined,
+          createdAt: node.createdAt,
+        };
+      });
+    } finally {
+      await session.close();
+    }
+  },
 };

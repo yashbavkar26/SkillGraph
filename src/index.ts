@@ -5,6 +5,8 @@ import { closeDriver } from './db/neo4j';
 import usersRouter from './api/users/route';
 import skillsRouter from './api/skills/route';
 import relationshipsRouter from './api/relationships/route';
+import evidenceRouter from './api/evidence';
+import endorseRouter from './api/endorse';
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
@@ -21,6 +23,8 @@ app.get('/health', (_req, res) => {
 app.use('/api/users', usersRouter);
 app.use('/api/skills', skillsRouter);
 app.use('/api/relationships', relationshipsRouter);
+app.use('/api/evidence', evidenceRouter);
+app.use('/api/endorse', endorseRouter);
 
 // 404 handler for unmatched routes
 app.use((_req, res) => {
@@ -28,7 +32,7 @@ app.use((_req, res) => {
 });
 
 // Start server after DB is ready
-async function start(): Promise<void> {
+export async function start(): Promise<void> {
   try {
     await initDb();
     const server = app.listen(PORT, () => {
@@ -53,6 +57,8 @@ async function start(): Promise<void> {
   }
 }
 
-start();
+if (process.env.NODE_ENV !== 'test' && require.main === module) {
+  void start();
+}
 
 export default app;
