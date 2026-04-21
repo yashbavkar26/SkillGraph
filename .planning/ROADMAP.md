@@ -32,7 +32,7 @@
 - [ ] Build Recruiter Search Engine UI.
 
 **Plans:** 4 plans
-- [ ] 03-01-contracts-and-test-foundation-PLAN.md — Define contracts and Wave-0 recruiter validation tests
+- [x] 03-01-contracts-and-test-foundation-PLAN.md — Define contracts and Wave-0 recruiter validation tests
 - [ ] 03-02-matching-api-and-explainability-PLAN.md — Implement retrieval, fit scoring, and explainable recruiter API
 - [ ] 03-03-recruiter-ui-runtime-setup-PLAN.md — Establish runnable recruiter frontend runtime and API client wiring
 - [ ] 03-04-recruiter-ui-search-experience-PLAN.md — Deliver recruiter search UX with explainability and UI quality gate
