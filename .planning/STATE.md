@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Executing Phase 03
-last_updated: "2026-04-21T11:30:28.231Z"
+last_updated: "2026-04-21T11:40:31.281Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 10
-  completed_plans: 7
-  percent: 70
+  completed_plans: 8
+  percent: 80
 ---
 
 # Project State: SkillGraph
@@ -56,6 +56,7 @@ Phase 3: Recruiter Search & Intelligent Matching
 | 02-evidence-peer-endorsement | 02-01 | 10m | 3 | 4 | 2026-04-21 |
 | 03-recruiter-search-intelligent-matching | planning | 0m | 4 | 6 | 2026-04-21 |
 | Phase 03-recruiter-search-intelligent-matching P03-01 | 3m | 3 tasks | 6 files |
+| Phase 03 P02 | 45m | 3 tasks | 10 files |
 
 ## Decisions
 
@@ -63,6 +64,9 @@ Phase 3: Recruiter Search & Intelligent Matching
 - Stored metadata as a JSON string in Neo4j for flexibility.
 - [Phase 03-recruiter-search-intelligent-matching]: Bound recruiter search contracts with strict zod limits before backend implementation.
 - [Phase 03-recruiter-search-intelligent-matching]: Standardized explainability to whitelist-only structured atoms for recruiter response contracts.
+- [Phase 03]: Implemented recruiter matching as parameterized retrieval + API-owned deterministic scoring with scoreVersion v1.
+- [Phase 03]: Added whitelist-only explainability atoms with normalized contribution values for recruiter UI consumption.
+- [Phase 03]: Enforced request payload guardrails (topK cap, size limit, and strict filter-key validation) on /api/recruiter/search.
 
 ## Blockers
 
