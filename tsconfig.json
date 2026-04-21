@@ -2,7 +2,13 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
+<<<<<<< HEAD
     "lib": ["ES2020"],
+=======
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+>>>>>>> 5214834dee8fd635f680a96f1f84723f35a844d2
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,

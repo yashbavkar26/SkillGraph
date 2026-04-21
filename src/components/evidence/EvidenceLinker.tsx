@@ -9,9 +9,13 @@ interface Skill {
 interface EvidenceLinkerProps {
   skills: Skill[];
   userId: string;
-  onSuccess?: (evidence: any) => void;
+  onSuccess?: (evidence: Record<string, unknown>) => void;
   onError?: (error: string) => void;
 }
+
+type EvidenceResponse = {
+  error?: string;
+} & Record<string, unknown>;
 
 const EvidenceLinker: React.FC<EvidenceLinkerProps> = ({ skills, userId, onSuccess, onError }) => {
   const [selectedSkillId, setSelectedSkillId] = useState<string>('');
@@ -51,7 +55,7 @@ const EvidenceLinker: React.FC<EvidenceLinkerProps> = ({ skills, userId, onSucce
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as EvidenceResponse;
 
       if (response.ok) {
         setStatus('success');
@@ -63,7 +67,7 @@ const EvidenceLinker: React.FC<EvidenceLinkerProps> = ({ skills, userId, onSucce
         setErrorMessage(data.error || 'Failed to submit evidence');
         if (onError) onError(data.error || 'Failed to submit evidence');
       }
-    } catch (err) {
+    } catch (_err) {
       setStatus('error');
       setErrorMessage('Network error. Please try again.');
       if (onError) onError('Network error');

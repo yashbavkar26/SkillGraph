@@ -15,6 +15,8 @@ describe('Recruiter Search API Contract: Ranking', () => {
     await initDb();
     const session = getDriver().session();
     try {
+      // CLEANUP: Ensure a fresh start by deleting all users
+      await session.run('MATCH (u:User) DETACH DELETE u');
       await session.run(
         `
         CREATE (:User {id: $recruiterId, email: $recruiterEmail, name: 'Recruiter Contract Test'})

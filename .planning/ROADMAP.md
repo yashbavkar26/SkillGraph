@@ -8,9 +8,9 @@
 - [x] Implement basic User Profile creation.
 
 **Plans:** 3 plans ✅ all complete
-- [x] 01-01-PLAN.md ✅ Infrastructure & Schema
-- [x] 02-02-PLAN.md ✅ Core Entity APIs
-- [x] 03-03-PLAN.md ✅ Relationship & Integration
+- [x] 01-01-PLAN.md — Infrastructure & Schema
+- [x] 02-02-PLAN.md — Core Entity APIs
+- [x] 03-03-PLAN.md — Relationship & Integration
 
 ## Phase 2: Evidence & Peer Endorsement
 *Goal: Enable users to build their profile with verifiable data.*
@@ -37,9 +37,15 @@
 - [x] 03-03-recruiter-ui-runtime-setup-PLAN.md — Establish runnable recruiter frontend runtime and API client wiring
 - [x] 03-04-recruiter-ui-search-experience-PLAN.md — Deliver recruiter search UX with explainability and UI quality gate
 
-## Phase 4: Advanced Verification & Scaling
+## Phase 4: Advanced Verification & Scaling ✅ Complete (2026-04-21)
 *Goal: Strengthen trust and prepare for mass adoption.*
-- [ ] Implement Advanced Reputation Engine (EigenTrust/Contextual weighting).
-- [ ] Integrate Automated Assessment ingestion.
-- [ ] Implement Anomaly Detection for endorsement collusion.
-- [ ] Optimize graph queries and scaling for high concurrency.
+- [x] Implement Advanced Reputation Engine (EigenTrust/Contextual weighting).
+- [x] Integrate Automated Assessment ingestion.
+- [x] Implement Anomaly Detection for endorsement collusion.
+- [x] Optimize graph queries and scaling for high concurrency.
+
+**Plans:** 4 plans ✅ all complete
+- [x] 04-01-PLAN.md — Advanced Reputation Engine (Algorithmic Core)
+- [x] 04-02-PLAN.md — Assessment Ingestion & Graph Linkage
+- [x] 04-03-PLAN.md — Collusion Detection & Anomaly Monitoring
+- [x] 04-04-PLAN.md — Graph Performance & Scale Optimization
