@@ -4,6 +4,7 @@ import { initDb } from './db/schema';
 import { closeDriver } from './db/neo4j';
 import usersRouter from './api/users/route';
 import skillsRouter from './api/skills/route';
+import relationshipsRouter from './api/relationships/route';
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
@@ -19,6 +20,7 @@ app.get('/health', (_req, res) => {
 // API routes
 app.use('/api/users', usersRouter);
 app.use('/api/skills', skillsRouter);
+app.use('/api/relationships', relationshipsRouter);
 
 // 404 handler for unmatched routes
 app.use((_req, res) => {
