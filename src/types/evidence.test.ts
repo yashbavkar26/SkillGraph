@@ -1,47 +1,46 @@
-import { EvidenceSchema } from './evidence';
+import { EvidenceInputSchema, EvidenceSchema } from './evidence';
+import { v4 as uuidv4 } from 'uuid';
 
-describe('EvidenceSchema', () => {
-  it('should validate correct input and transform it', () => {
+describe('Evidence schemas', () => {
+  it('should validate correct input and allow creation of Evidence object', () => {
     const input = {
-      userId: '550e8400-e29b-41d4-a716-446655440000',
-      skillId: '660e8400-e29b-41d4-a716-446655440001',
+      skillId: uuidv4(),
       url: 'https://github.com/user/repo',
-      type: 'github',
+      type: 'github' as const,
       metadata: { description: 'My awesome repo' }
     };
 
-    const result = EvidenceSchema.parse(input);
+    const validatedInput = EvidenceInputSchema.parse(input);
+    
+    const evidence: any = {
+      ...validatedInput,
+      id: uuidv4(),
+      userId: uuidv4(),
+      createdAt: new Date().toISOString()
+    };
 
-    expect(result.id).toBeDefined();
-    expect(result.userId).toBe(input.userId);
-    expect(result.skillId).toBe(input.skillId);
-    expect(result.url).toBe(input.url);
-    expect(result.type).toBe(input.type);
-    expect(result.metadata.description).toBe(input.metadata.description);
-    expect(result.createdAt).toBeDefined();
+    expect(EvidenceSchema.parse(evidence)).toEqual(evidence);
   });
 
   it('should fail on invalid URL', () => {
     const input = {
-      userId: '550e8400-e29b-41d4-a716-446655440000',
-      skillId: '660e8400-e29b-41d4-a716-446655440001',
+      skillId: uuidv4(),
       url: 'not-a-url',
-      type: 'github',
+      type: 'github' as const,
       metadata: {}
     };
 
-    expect(() => EvidenceSchema.parse(input)).toThrow();
+    expect(() => EvidenceInputSchema.parse(input)).toThrow();
   });
 
   it('should fail on invalid type', () => {
     const input = {
-      userId: '550e8400-e29b-41d4-a716-446655440000',
-      skillId: '660e8400-e29b-41d4-a716-446655440001',
+      skillId: uuidv4(),
       url: 'https://github.com/user/repo',
       type: 'invalid-type' as any,
       metadata: {}
     };
 
-    expect(() => EvidenceSchema.parse(input)).toThrow();
+    expect(() => EvidenceInputSchema.parse(input)).toThrow();
   });
 });
