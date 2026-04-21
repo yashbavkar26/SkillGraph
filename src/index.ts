@@ -7,6 +7,7 @@ import skillsRouter from './api/skills/route';
 import relationshipsRouter from './api/relationships/route';
 import evidenceRouter from './api/evidence';
 import endorseRouter from './api/endorse';
+import recruiterSearchRouter from './api/recruiter/search';
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
@@ -25,6 +26,7 @@ app.use('/api/skills', skillsRouter);
 app.use('/api/relationships', relationshipsRouter);
 app.use('/api/evidence', evidenceRouter);
 app.use('/api/endorse', endorseRouter);
+app.use('/api/recruiter', recruiterSearchRouter);
 
 // 404 handler for unmatched routes
 app.use((_req, res) => {

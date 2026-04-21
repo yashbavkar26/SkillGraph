@@ -2,10 +2,10 @@ import { SCORE_VERSION } from '../../types/recruiter/search';
 import type { RecruiterCandidateFeatures } from './retrieval';
 
 const FIT_SCORE_WEIGHTS = {
-  matchedSkills: 0.5,
-  evidence: 0.2,
+  matchedSkills: 0.4,
+  evidence: 0.15,
   endorsement: 0.15,
-  graphSimilarity: 0.15,
+  graphSimilarity: 0.3,
 } as const;
 
 type FitScoreContributions = {
@@ -66,4 +66,3 @@ export function computeFitScore(
     contributions,
   };
 }
-

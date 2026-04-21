@@ -27,8 +27,23 @@ WITH candidate, matchedSkillIds, proficiencySum, evidenceCount, endorsementCount
   CASE
     WHEN size($requiredSkillIds) = 0 THEN 0.0
     ELSE toFloat(size(matchedSkillIds)) / toFloat(size($requiredSkillIds))
-  END AS skillCoverage
-WHERE size($requiredSkillIds) = 0 OR size(matchedSkillIds) > 0
+  END AS skillCoverage,
+  CASE
+    WHEN size($industriesLower) = 0 THEN 0.0
+    ELSE toFloat(size([
+      industry IN $industriesLower
+      WHERE any(candidateIndustry IN coalesce(candidate.industries, [])
+        WHERE toLower(toString(candidateIndustry)) = industry)
+    ])) / toFloat(size($industriesLower))
+  END AS industryCoverage,
+  CASE
+    WHEN size($projectTypesLower) = 0 THEN 0.0
+    ELSE toFloat(size([
+      projectType IN $projectTypesLower
+      WHERE any(candidateProjectType IN coalesce(candidate.projectTypes, [])
+        WHERE toLower(toString(candidateProjectType)) = projectType)
+    ])) / toFloat(size($projectTypesLower))
+  END AS projectCoverage
 RETURN
   toString(candidate.id) AS candidateId,
   coalesce(toString(candidate.name), 'Unknown Candidate') AS displayName,
@@ -39,8 +54,12 @@ RETURN
   evidenceCount,
   endorsementCount,
   proficiencySum,
-  skillCoverage AS graphSimilarity
+  CASE
+    WHEN size($industriesLower) = 0 AND size($projectTypesLower) = 0 THEN skillCoverage
+    WHEN size($industriesLower) = 0 THEN projectCoverage
+    WHEN size($projectTypesLower) = 0 THEN industryCoverage
+    ELSE (industryCoverage + projectCoverage) / 2.0
+  END AS graphSimilarity
 ORDER BY matchedSkillCount DESC, endorsementCount DESC, evidenceCount DESC, candidateId ASC
 LIMIT $topK
 `;
-

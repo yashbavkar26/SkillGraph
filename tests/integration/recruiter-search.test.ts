@@ -77,10 +77,15 @@ describe('Recruiter Search API Contract: Ranking', () => {
   });
 
   it('returns ranked candidates with stable ordering semantics', async () => {
+    const unfilteredRequest = {
+      ...recruiterSearchRequestFixture,
+      filters: {},
+    };
+
     const response = await request(app)
       .post('/api/recruiter/search')
       .set('x-user-id', recruiterId)
-      .send(recruiterSearchRequestFixture);
+      .send(unfilteredRequest);
 
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body.candidates)).toBe(true);
