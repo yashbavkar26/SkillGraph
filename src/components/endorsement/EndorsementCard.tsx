@@ -13,9 +13,13 @@ interface EndorsementCardProps {
   recipientId: string;
   skillId: string;
   alreadyEndorsed?: boolean;
-  onCreated?: (payload: unknown) => void;
+  onCreated?: (payload: Record<string, unknown>) => void;
   onError?: (message: string) => void;
 }
+
+type EndorsementResponse = {
+  error?: string;
+} & Record<string, unknown>;
 
 const EndorsementCard: React.FC<EndorsementCardProps> = ({
   endorsement,
@@ -45,7 +49,7 @@ const EndorsementCard: React.FC<EndorsementCardProps> = ({
           comment: comment || undefined,
         }),
       });
-      const data = await response.json();
+      const data = (await response.json()) as EndorsementResponse;
       if (!response.ok) {
         setStatus('error');
         setErrorMessage(data.error ?? 'Failed to create endorsement');

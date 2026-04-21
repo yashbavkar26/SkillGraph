@@ -15,6 +15,17 @@ interface SkillDetailData {
   proficiency?: number;
 }
 
+type EndorsementApiItem = {
+  id: string;
+  endorserId: string;
+  skillId: string;
+  timestamp: string;
+  comment?: string;
+  skill?: {
+    name?: string;
+  };
+};
+
 const SkillDetail: React.FC<SkillDetailProps> = ({ userId, skillId }) => {
   const [skill, setSkill] = useState<SkillDetailData | null>(null);
   const [endorsements, setEndorsements] = useState<EndorsementCardData[]>([]);
@@ -30,17 +41,23 @@ const SkillDetail: React.FC<SkillDetailProps> = ({ userId, skillId }) => {
         ]);
 
         if (skillRes.ok) {
-          setSkill(await skillRes.json());
+          setSkill((await skillRes.json()) as SkillDetailData);
         } else {
           setSkill(null);
         }
 
         if (endorseRes.ok) {
-          const raw = await endorseRes.json();
+          const raw = (await endorseRes.json()) as unknown;
           const mapped = Array.isArray(raw)
             ? raw
-                .filter((item: any) => item.skillId === skillId)
-                .map((item: any) => ({
+                .filter(
+                  (item): item is EndorsementApiItem =>
+                    typeof item === 'object' &&
+                    item !== null &&
+                    'skillId' in item &&
+                    (item as EndorsementApiItem).skillId === skillId
+                )
+                .map((item) => ({
                   id: item.id,
                   endorserName: item.endorserId,
                   skillName: item.skill?.name ?? skill?.name ?? 'Skill',
