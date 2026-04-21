@@ -7,10 +7,10 @@
 - [x] Develop basic API for User and Skill management.
 - [x] Implement basic User Profile creation.
 
-**Plans:** 3 plans — all complete
-- [x] 01-01-PLAN.md — Infrastructure & Schema
-- [x] 02-02-PLAN.md — Core Entity APIs
-- [x] 03-03-PLAN.md — Relationship & Integration
+**Plans:** 3 plans ✅ all complete
+- [x] 01-01-PLAN.md ✅ Infrastructure & Schema
+- [x] 02-02-PLAN.md ✅ Core Entity APIs
+- [x] 03-03-PLAN.md ✅ Relationship & Integration
 
 ## Phase 2: Evidence & Peer Endorsement
 *Goal: Enable users to build their profile with verifiable data.*
@@ -18,6 +18,11 @@
 - [ ] Implement basic Peer Endorsement system.
 - [ ] Develop basic Reputation Engine (simple weighting).
 - [ ] Build basic Talent Portal UI for skill management.
+
+**Plans:** 3 plans
+- [ ] 02-01-PLAN.md — Evidence & Artifact Integration
+- [ ] 02-02-PLAN.md — Peer Endorsement System
+- [ ] 02-03-PLAN.md — Talent Portal UI
 
 ## Phase 3: Recruiter Search & Intelligent Matching
 *Goal: Deliver value to recruiters through advanced search capabilities.*
