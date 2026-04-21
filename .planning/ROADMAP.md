@@ -20,7 +20,7 @@
 - [ ] Build basic Talent Portal UI for skill management.
 
 **Plans:** 3 plans
-- [ ] 02-01-PLAN.md — Evidence & Artifact Integration
+- [x] 02-01-PLAN.md — Evidence & Artifact Integration
 - [ ] 02-02-PLAN.md — Peer Endorsement System
 - [ ] 02-03-PLAN.md — Talent Portal UI
 

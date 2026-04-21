@@ -4,7 +4,7 @@
 
 ### 1.1 Talent Portal (User-Facing)
 - **FR-1: Skill Graph Management**: Users must be able to add, remove, and organize micro-skills in a visual or structured way.
-- **FR-2: Evidence Linking**: Users must be able to link external artifacts (GitHub repos, portfolio sites, certificates) as evidence for specific skills.
+- [x] **FR-2: Evidence Linking**: Users must be able to link external artifacts (GitHub repos, portfolio sites, certificates) as evidence for specific skills.
 - **FR-3: Endorsement Request**: Users must be able to request endorsements from peers or project collaborators.
 - **FR-4: Skill Evolution Tracking**: The system must maintain a history of skill growth and changes over time.
 
@@ -16,7 +16,7 @@
 ### 1.3 Verification Layer
 - **FR-8: Peer Endorsements**: A mechanism for users to endorse others, with weight determined by the endorser's own reputation.
 - **FR-9: Automated Assessment Integration**: Ability to ingest results from external skill assessments (e.g., coding challenges).
-- **FR-10: Artifact Verification**: A workflow for reviewing linked artifacts to validate claims.
+- [x] **FR-10: Artifact Verification**: A workflow for reviewing linked artifacts to validate claims.
 
 ## 2. Non-Functional Requirements
 
