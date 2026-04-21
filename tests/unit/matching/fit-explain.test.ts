@@ -80,7 +80,7 @@ describe('matching fit score + explainability', () => {
 
     const atoms = buildExplanationAtoms(result);
     const totalContribution = atoms.reduce(
-      (sum, atom) => sum + atom.contribution,
+      (sum: number, atom: { contribution: number }) => sum + atom.contribution,
       0
     );
 
@@ -112,4 +112,3 @@ describe('matching fit score + explainability', () => {
     }
   });
 });
-
