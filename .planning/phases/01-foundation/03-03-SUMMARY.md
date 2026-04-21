@@ -35,14 +35,14 @@ User-Skill graph edge API (`(:User)-[:HAS_SKILL]->(:Skill)`) and a comprehensive
 
 | Test | What it verifies |
 |------|-----------------|
-| Create User | UserModel.create() returns populated entity |
+| Create User | .create() returns populated entity |
 | Create Skill | SkillModel.create() with category |
 | Retrieve User | findById() round-trip |
 | Retrieve Skill | findById() round-trip |
 | Create HAS_SKILL | Relationship created with proficiency |
 | Cypher verify | Direct Bolt query confirms edge exists in graph |
 | getSkillsForUser | Model-level relationship query |
-| Null on missing user | Returns null, no error thrown |
+| Null on missing user | UserModelReturns null, no error thrown |
 | Null on missing skill | Returns null, no error thrown |
 | Uniqueness enforcement | Duplicate email/name throws |
 

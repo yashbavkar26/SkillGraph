@@ -16,11 +16,8 @@ export default defineConfig({
       },
     },
   },
-<<<<<<< HEAD
   build: {
     outDir: 'dist/recruiter-ui',
     emptyOutDir: false,
   },
-=======
->>>>>>> 5214834dee8fd635f680a96f1f84723f35a844d2
 });

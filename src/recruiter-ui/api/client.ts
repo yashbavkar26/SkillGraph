@@ -52,3 +52,35 @@ export async function searchRecruiterCandidates(
   const body = await response.json();
   return RecruiterSearchResponseSchema.parse(body);
 }
+
+export async function registerCandidate(name: string, email: string): Promise<any> {
+  const response = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to register');
+  }
+  return response.json();
+}
+
+export async function fetchAllSkills(): Promise<any[]> {
+  const response = await fetch('/api/skills');
+  if (!response.ok) throw new Error('Failed to fetch skills');
+  return response.json();
+}
+
+export async function addSkillToCandidate(userId: string, skillId: string, proficiency: number = 3): Promise<any> {
+  const response = await fetch('/api/relationships', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, skillId, proficiency }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to add skill');
+  }
+  return response.json();
+}
