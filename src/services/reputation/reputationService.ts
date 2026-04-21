@@ -90,10 +90,8 @@ export class ReputationService {
   ): Promise<ReputationRefreshResult> {
     const session = this.resolveDriver().session();
     try {
-      const [usersResult, edgesResult] = await Promise.all([
-        session.run(FETCH_REPUTATION_USER_IDS),
-        session.run(FETCH_REPUTATION_TRUST_EDGES),
-      ]);
+      const usersResult = await session.run(FETCH_REPUTATION_USER_IDS);
+      const edgesResult = await session.run(FETCH_REPUTATION_TRUST_EDGES);
 
       const userIds = toUserIds(usersResult.records);
       const edges = toTrustEdges(edgesResult.records);

@@ -14,6 +14,8 @@ export interface User {
   email: string;
   /** Display name */
   name: string;
+  /** Application role */
+  role?: 'candidate' | 'recruiter';
   /** ISO 8601 creation timestamp */
   createdAt: string;
 }
@@ -53,3 +55,4 @@ export interface PaginatedResult<T> {
   page: number;
   pageSize: number;
 }
+

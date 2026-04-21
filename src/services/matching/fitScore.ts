@@ -39,7 +39,20 @@ export function computeFitScore(
       ? clamp01(candidate.matchedSkillCount / requiredSkillCount)
       : clamp01(candidate.matchedSkillCount > 0 ? 1 : 0);
   const evidenceRatio = clamp01(candidate.evidenceCount / 5);
-  const endorsementRatio = clamp01(candidate.endorsementCount / 5);
+  const endorsementDepthRatio = clamp01(candidate.weightedEndorsementScore / 4.5);
+  const endorsementDiversityRatio = clamp01(candidate.uniqueEndorserCount / 5);
+  const endorsementCoverageRatio =
+    requiredSkillCount > 0
+      ? clamp01(candidate.matchedEndorsedSkillCount / requiredSkillCount)
+      : clamp01(candidate.weightedEndorsementScore > 0 ? 1 : 0);
+  const noSkillGraphLift =
+    candidate.candidateSkillCount === 0 ? clamp01(candidate.weightedEndorsementScore / 3.8) : 0;
+  const endorsementRatio = clamp01(
+    endorsementDepthRatio * 0.4 +
+      endorsementCoverageRatio * 0.32 +
+      endorsementDiversityRatio * 0.24 +
+      noSkillGraphLift * 0.38
+  );
   const similarityRatio = clamp01(candidate.graphSimilarity);
 
   const contributions: FitScoreContributions = {

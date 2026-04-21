@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getStoredUser } from '../../recruiter-ui/api/client';
 
 export interface EndorsementCardData {
   id: string;
@@ -40,13 +41,32 @@ const EndorsementCard: React.FC<EndorsementCardProps> = ({
     setErrorMessage('');
 
     try {
+      const currentUser = getStoredUser();
+      const actorUserId = currentUser?.id?.trim();
+      if (!actorUserId) {
+        setStatus('error');
+        setErrorMessage('Sign in first to submit endorsements');
+        onError?.('Sign in first to submit endorsements');
+        return;
+      }
+
+      if (actorUserId === recipientId) {
+        setStatus('error');
+        setErrorMessage('Users cannot endorse themselves');
+        onError?.('Users cannot endorse themselves');
+        return;
+      }
+
       const response = await fetch('/api/endorse', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': actorUserId,
+        },
         body: JSON.stringify({
-          recipientId,
-          skillId,
-          comment: comment || undefined,
+          recipientId: recipientId.trim(),
+          skillId: skillId.trim(),
+          comment: comment.trim() || undefined,
         }),
       });
       const data = (await response.json()) as EndorsementResponse;

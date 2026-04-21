@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   RecruiterSearchRequestSchema,
   type RecruiterSearchRequest,
@@ -8,31 +8,53 @@ import { normalizeDelimitedList } from '../api/client';
 type SearchFormProps = {
   initialRecruiterId?: string;
   loading: boolean;
+  availableSkills: Array<{ id: string; name: string }>;
   onSubmit: (request: RecruiterSearchRequest, recruiterId: string) => Promise<void>;
 };
 
 type FormState = {
-  recruiterId: string;
   query: string;
+  skillQuery: string;
   topK: string;
   industries: string;
   projectTypes: string;
-  requiredSkillIds: string;
   minFitScore: string;
 };
 
-const initialState = (recruiterId = ''): FormState => ({
-  recruiterId,
-  query: 'Senior graph engineer',
+const initialState = (): FormState => ({
+  query: '',
+  skillQuery: '',
   topK: '5',
-  industries: 'fintech',
-  projectTypes: 'backend-platform',
-  requiredSkillIds:
-    '11111111-1111-4111-8111-111111111111,\n22222222-2222-4222-8222-222222222222',
-  minFitScore: '0.25',
+  industries: '',
+  projectTypes: '',
+  minFitScore: '',
 });
 
-function buildRequest(state: FormState): RecruiterSearchRequest {
+function rankSkillsByQuery(
+  skillQuery: string,
+  availableSkills: Array<{ id: string; name: string }>
+): Array<{ id: string; name: string }> {
+  const query = skillQuery.trim().toLowerCase();
+  if (!query) return [];
+
+  return [...availableSkills]
+    .map((skill) => {
+      const name = skill.name.toLowerCase();
+      let score = 0;
+      if (name === query) score += 10;
+      if (name.startsWith(query)) score += 6;
+      if (name.includes(query)) score += 4;
+      for (const token of query.split(/\s+/)) {
+        if (token && name.includes(token)) score += 1;
+      }
+      return { skill, score };
+    })
+    .filter((row) => row.score > 0)
+    .sort((a, b) => b.score - a.score || a.skill.name.localeCompare(b.skill.name))
+    .map((row) => row.skill);
+}
+
+function buildRequest(state: FormState, requiredSkillIds: string[]): RecruiterSearchRequest {
   return RecruiterSearchRequestSchema.parse({
     query: state.query.trim() || undefined,
     topK: Number(state.topK),
@@ -40,7 +62,7 @@ function buildRequest(state: FormState): RecruiterSearchRequest {
     filters: {
       industries: normalizeDelimitedList(state.industries),
       projectTypes: normalizeDelimitedList(state.projectTypes),
-      requiredSkillIds: normalizeDelimitedList(state.requiredSkillIds),
+      requiredSkillIds,
       minFitScore: state.minFitScore === '' ? undefined : Number(state.minFitScore),
     },
   });
@@ -49,13 +71,39 @@ function buildRequest(state: FormState): RecruiterSearchRequest {
 const SearchForm: React.FC<SearchFormProps> = ({
   initialRecruiterId = '',
   loading,
+  availableSkills,
   onSubmit,
 }) => {
-  const [form, setForm] = useState<FormState>(initialState(initialRecruiterId));
+  const [form, setForm] = useState<FormState>(initialState());
   const [error, setError] = useState('');
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
+  const lastAutoSearchSignature = useRef('');
 
   const updateField = (key: keyof FormState, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const rankedSkillSuggestions = useMemo(
+    () => rankSkillsByQuery(form.skillQuery, availableSkills).slice(0, 8),
+    [form.skillQuery, availableSkills]
+  );
+
+  const selectedSkills = useMemo(
+    () => selectedSkillIds
+      .map((id) => availableSkills.find((skill) => skill.id === id))
+      .filter((skill): skill is { id: string; name: string } => Boolean(skill)),
+    [selectedSkillIds, availableSkills]
+  );
+
+  const selectSkill = (skillId: string) => {
+    setSelectedSkillIds((current) => (current.includes(skillId) ? current : [...current, skillId]));
+    setForm((current) => ({ ...current, skillQuery: '' }));
+    setError('');
+  };
+
+  const removeSelectedSkill = (skillId: string) => {
+    setSelectedSkillIds((current) => current.filter((id) => id !== skillId));
+    setError('');
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -63,16 +111,11 @@ const SearchForm: React.FC<SearchFormProps> = ({
     setError('');
 
     try {
-      const request = buildRequest(form);
-      const recruiterId = form.recruiterId.trim();
-
-      if (!recruiterId) {
-        setError('Enter a recruiter id before running a search.');
-        return;
-      }
+      const recruiterId = initialRecruiterId.trim();
+      const request = buildRequest(form, selectedSkillIds);
 
       if (!request.query && (request.filters.requiredSkillIds?.length ?? 0) === 0) {
-        setError('Add a recruiter query or at least one required skill id.');
+        setError('Type a skill name or add a role brief to start searching.');
         return;
       }
 
@@ -86,8 +129,62 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
   const handleReset = () => {
     setError('');
-    setForm(initialState(initialRecruiterId));
+    setForm(initialState());
+    setSelectedSkillIds([]);
+    lastAutoSearchSignature.current = '';
   };
+
+  useEffect(() => {
+    const recruiterId = initialRecruiterId.trim();
+    if (!recruiterId || loading) return;
+
+    const candidateIds = rankedSkillSuggestions.slice(0, 5).map((skill) => skill.id);
+    const autoSkillIds =
+      selectedSkillIds.length > 0
+        ? selectedSkillIds
+        : candidateIds.slice(0, 1);
+
+    if (form.skillQuery.trim().length < 2 && autoSkillIds.length === 0) {
+      return;
+    }
+
+    const signature = JSON.stringify({
+      query: form.query.trim(),
+      topK: form.topK,
+      industries: form.industries,
+      projectTypes: form.projectTypes,
+      minFitScore: form.minFitScore,
+      autoSkillIds,
+    });
+
+    if (lastAutoSearchSignature.current === signature) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const request = buildRequest(form, autoSkillIds);
+        if (!request.query && (request.filters.requiredSkillIds?.length ?? 0) === 0) {
+          return;
+        }
+        lastAutoSearchSignature.current = signature;
+        await onSubmit(request, recruiterId);
+      } catch (submitError) {
+        setError(
+          submitError instanceof Error ? submitError.message : 'Review the search inputs.'
+        );
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [
+    form,
+    initialRecruiterId,
+    loading,
+    onSubmit,
+    rankedSkillSuggestions,
+    selectedSkillIds,
+  ]);
 
   return (
     <form className="search-form" onSubmit={handleSubmit}>
@@ -97,23 +194,12 @@ const SearchForm: React.FC<SearchFormProps> = ({
           <h1>Find talent with explainable fit, not keyword luck.</h1>
         </div>
         <p className="search-form__lede">
-          Combine role intent, market context, and required skill ids to rank candidates
-          with a recruiter-safe explanation trail.
+          Type a skill name and the graph updates instantly with best matching candidates.
+          You can add multiple skills without using raw UUIDs.
         </p>
       </div>
 
       <div className="search-form__grid">
-        <label className="field">
-          <span>Recruiter ID</span>
-          <input
-            type="text"
-            value={form.recruiterId}
-            onChange={(event) => updateField('recruiterId', event.target.value)}
-            placeholder="00000000-0000-4000-8000-000000000003"
-            autoComplete="off"
-          />
-        </label>
-
         <label className="field">
           <span>Top results</span>
           <select
@@ -158,14 +244,56 @@ const SearchForm: React.FC<SearchFormProps> = ({
         </label>
 
         <label className="field field--full">
-          <span>Required skill IDs</span>
-          <textarea
-            value={form.requiredSkillIds}
-            onChange={(event) => updateField('requiredSkillIds', event.target.value)}
-            placeholder="One UUID per line or comma-separated"
-            rows={4}
+          <span>Skill name (live search)</span>
+          <input
+            type="text"
+            value={form.skillQuery}
+            onChange={(event) => updateField('skillQuery', event.target.value)}
+            placeholder="e.g. GraphQL, Neo4j, Recommendation Systems"
+            autoComplete="off"
           />
         </label>
+
+        {selectedSkills.length > 0 ? (
+          <div className="field field--full">
+            <span>Selected skills</span>
+            <div className="tag-row">
+              {selectedSkills.map((skill) => (
+                <button
+                  key={skill.id}
+                  type="button"
+                  className="tag"
+                  onClick={() => removeSelectedSkill(skill.id)}
+                  title="Click to remove skill"
+                >
+                  {skill.name} x
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {form.skillQuery.trim().length > 0 ? (
+          <div className="field field--full">
+            <span>Suggestions</span>
+            <div className="tag-row">
+              {rankedSkillSuggestions.length > 0 ? (
+                rankedSkillSuggestions.map((skill) => (
+                  <button
+                    key={skill.id}
+                    type="button"
+                    className="tag tag--muted"
+                    onClick={() => selectSkill(skill.id)}
+                  >
+                    {skill.name}
+                  </button>
+                ))
+              ) : (
+                <span className="subtle-copy">No matching skills found.</span>
+              )}
+            </div>
+          </div>
+        ) : null}
 
         <label className="field">
           <span>Minimum fit score</span>

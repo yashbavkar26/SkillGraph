@@ -13,6 +13,8 @@ const CONSTRAINT_STATEMENTS: readonly string[] = [
    FOR (u:User) REQUIRE u.id IS UNIQUE`,
   `CREATE CONSTRAINT skill_name_unique IF NOT EXISTS
    FOR (s:Skill) REQUIRE s.name IS UNIQUE`,
+  `CREATE CONSTRAINT skill_normalized_name_unique IF NOT EXISTS
+   FOR (s:Skill) REQUIRE s.normalizedName IS UNIQUE`,
   `CREATE CONSTRAINT skill_id_unique IF NOT EXISTS
    FOR (s:Skill) REQUIRE s.id IS UNIQUE`,
 ];

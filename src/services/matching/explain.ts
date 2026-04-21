@@ -19,6 +19,11 @@ export function buildExplanationAtoms(
     candidate.contributions.graphSimilarity,
   ]);
 
+  const endorsementValue =
+    candidate.candidateSkillCount === 0
+      ? `${candidate.endorsementCount} endorsements (weighted ${candidate.weightedEndorsementScore.toFixed(2)}) surfaced this profile without a linked skill graph`
+      : `${candidate.endorsementCount} endorsements from ${candidate.uniqueEndorserCount} peers (weighted ${candidate.weightedEndorsementScore.toFixed(2)})`;
+
   return [
     {
       type: 'matched_skills',
@@ -35,7 +40,7 @@ export function buildExplanationAtoms(
     {
       type: 'endorsement',
       label: 'Peer endorsements',
-      value: `${candidate.endorsementCount} endorsements in matched skills`,
+      value: endorsementValue,
       contribution: normalized[2],
     },
     {

@@ -2,6 +2,23 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDriver } from '../db/neo4j';
 import { Skill } from '../types/graph';
 
+function normalizeSkillName(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9+\s#.-]/g, ' ')
+    .replace(/\s+/g, ' ');
+}
+
+function toDisplaySkillName(raw: string): string {
+  return raw
+    .trim()
+    .replace(/\s+/g, ' ')
+    .split(' ')
+    .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
+    .join(' ');
+}
+
 /**
  * Data access layer for Skill nodes in Neo4j.
  * All Cypher queries use parameterized inputs (T-02-01 mitigation).
@@ -14,6 +31,8 @@ export const SkillModel = {
   async create(input: { name: string; category?: string }): Promise<Skill> {
     const session = getDriver().session();
     try {
+      const normalizedName = normalizeSkillName(input.name);
+      const name = toDisplaySkillName(input.name);
       const id = uuidv4();
       const createdAt = new Date().toISOString();
 
@@ -21,13 +40,15 @@ export const SkillModel = {
         `CREATE (s:Skill {
            id: $id,
            name: $name,
+           normalizedName: $normalizedName,
            category: $category,
            createdAt: $createdAt
          })
          RETURN s`,
         {
           id,
-          name: input.name,
+          name,
+          normalizedName,
           category: input.category ?? null,
           createdAt,
         }
@@ -81,9 +102,13 @@ export const SkillModel = {
   async findByName(name: string): Promise<Skill | null> {
     const session = getDriver().session();
     try {
+      const normalizedName = normalizeSkillName(name);
       const result = await session.run(
-        'MATCH (s:Skill {name: $name}) RETURN s',
-        { name }
+        `MATCH (s:Skill)
+         WHERE s.normalizedName = $normalizedName OR toLower(trim(s.name)) = $normalizedName
+         RETURN s
+         LIMIT 1`,
+        { normalizedName }
       );
 
       if (result.records.length === 0) return null;

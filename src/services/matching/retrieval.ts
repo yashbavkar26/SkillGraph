@@ -12,8 +12,12 @@ export type RecruiterCandidateFeatures = {
   projectTypes: string[];
   matchedSkillIds: string[];
   matchedSkillCount: number;
+  matchedEndorsedSkillCount: number;
+  candidateSkillCount: number;
   evidenceCount: number;
   endorsementCount: number;
+  weightedEndorsementScore: number;
+  uniqueEndorserCount: number;
   proficiencySum: number;
   graphSimilarity: number;
 };
@@ -54,7 +58,7 @@ export async function retrieveRecruiterCandidates(
     industriesLower: normalizeLowercase(filters.industries),
     projectTypesLower: normalizeLowercase(filters.projectTypes),
     requiredSkillIds: filters.requiredSkillIds ?? [],
-    topK: Math.trunc(Math.max(1, Math.min(input.request.topK, 50))),
+    candidatePoolSize: Math.trunc(Math.max(input.request.topK * 4, 40)),
   };
 
   try {
@@ -70,8 +74,12 @@ export async function retrieveRecruiterCandidates(
           projectTypes: (record.get('projectTypes') ?? []) as string[],
           matchedSkillIds: (record.get('matchedSkillIds') ?? []) as string[],
           matchedSkillCount: asNumber(record.get('matchedSkillCount')),
+          matchedEndorsedSkillCount: asNumber(record.get('matchedEndorsedSkillCount')),
+          candidateSkillCount: asNumber(record.get('candidateSkillCount')),
           evidenceCount: asNumber(record.get('evidenceCount')),
           endorsementCount: asNumber(record.get('endorsementCount')),
+          weightedEndorsementScore: asNumber(record.get('weightedEndorsementScore')),
+          uniqueEndorserCount: asNumber(record.get('uniqueEndorserCount')),
           proficiencySum: asNumber(record.get('proficiencySum')),
           graphSimilarity: asNumber(record.get('graphSimilarity')),
         })),

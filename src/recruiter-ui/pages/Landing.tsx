@@ -1,46 +1,127 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { UserPlus, Search } from 'lucide-react';
+import { Search, UserPlus } from 'lucide-react';
+import HeroGraph from '../components/HeroGraph';
 
-const Landing: React.FC = () => {
+type LandingProps = {
+  userName: string;
+  onLogout: () => void;
+};
+
+const Landing: React.FC<LandingProps> = ({ userName, onLogout }) => {
   return (
-    <main className="recruiter-shell" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
-      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '3rem', color: 'var(--accent-strong)', marginBottom: '1rem' }}>SkillGraph</h1>
-        <p className="subtle-copy" style={{ fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-          A unified digital system for connecting verified talent with the right opportunities based on a dynamic graph of micro-skills.
-        </p>
-      </div>
+    <main className="landing-root">
+      <section className="landing-hero">
+        <div className="landing-hero__bg" aria-hidden="true">
+          <HeroGraph />
+          <div className="landing-hero__grid" />
+        </div>
 
-      <div className="search-form__grid" style={{ width: '100%', maxWidth: '900px', gap: '2rem' }}>
-        
-        <Link to="/candidate" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <div className="panel" style={{ padding: '3rem 2rem', textAlign: 'center', transition: 'transform 0.2s ease', cursor: 'pointer', height: '100%' }}>
-            <div style={{ background: 'var(--accent-soft)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--accent-strong)' }}>
-              <UserPlus size={40} />
-            </div>
-            <h2>I am a Candidate</h2>
-            <p className="subtle-copy" style={{ margin: '1rem auto' }}>
-              Register yourself to the portal, add your skills to the graph, and get discovered by top recruiters.
-            </p>
-            <span className="button button--primary" style={{ display: 'inline-block', marginTop: '1rem' }}>Register Now</span>
+        <header className="landing-nav recruiter-shell">
+          <div className="landing-brand">
+            <span className="landing-brand__dot" />
+            <span>
+              Skill<span className="landing-brand__accent">Graph</span>
+            </span>
           </div>
-        </Link>
 
-        <Link to="/recruiter" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <div className="panel" style={{ padding: '3rem 2rem', textAlign: 'center', transition: 'transform 0.2s ease', cursor: 'pointer', height: '100%' }}>
-            <div style={{ background: 'rgba(31, 107, 92, 0.1)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--success)' }}>
-              <Search size={40} />
-            </div>
-            <h2>I am a Recruiter</h2>
-            <p className="subtle-copy" style={{ margin: '1rem auto' }}>
-              Search the verifiable skill graph to find the perfect candidates for your open roles.
-            </p>
-            <span className="button button--ghost" style={{ display: 'inline-block', marginTop: '1rem', border: '1px solid var(--accent-strong)' }}>Search Graph</span>
+          <div className="landing-nav__actions">
+            <span className="tag">Signed in as {userName}</span>
+            <button type="button" className="button button--ghost" onClick={onLogout}>
+              Logout
+            </button>
           </div>
-        </Link>
+        </header>
 
-      </div>
+        <div className="recruiter-shell landing-hero__content">
+          <p className="eyebrow">Live skill intelligence platform</p>
+          <h1 className="landing-title">
+            Your skills.
+            <br />
+            <span className="landing-title__accent">Mapped. Verified. Alive.</span>
+          </h1>
+          <p className="landing-subtitle subtle-copy">
+            SkillGraph replaces the static resume with a dynamic, verifiable graph of
+            micro-skills and evidence signals for candidates and recruiters.
+          </p>
+
+          <div className="landing-stats">
+            <article>
+              <strong>4.2M</strong>
+              <span>verified nodes</span>
+            </article>
+            <article>
+              <strong>218k</strong>
+              <span>graphs built</span>
+            </article>
+            <article>
+              <strong>94%</strong>
+              <span>recruiter precision</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="recruiter-shell landing-actions">
+        <div className="landing-cards">
+          <Link to="/candidate" className="landing-card-link">
+            <article className="panel landing-card">
+              <div className="landing-card__icon">
+                <UserPlus size={34} />
+              </div>
+              <p className="eyebrow">Candidate Portal</p>
+              <h2>I am a Candidate</h2>
+              <p className="subtle-copy">
+                Build your graph, attach proof, and make your skills discoverable with
+                explainable signals.
+              </p>
+              <span className="button button--primary">Build My Graph</span>
+            </article>
+          </Link>
+
+          <Link to="/recruiter" className="landing-card-link">
+            <article className="panel landing-card">
+              <div className="landing-card__icon landing-card__icon--secondary">
+                <Search size={34} />
+              </div>
+              <p className="eyebrow">Recruiter Console</p>
+              <h2>I am a Recruiter</h2>
+              <p className="subtle-copy">
+                Query the graph, inspect fit explanations, and shortlist top candidates in
+                real time.
+              </p>
+              <span className="button button--ghost">Search Talent</span>
+            </article>
+          </Link>
+        </div>
+
+        <div className="landing-process">
+          <article className="panel landing-process__card">
+            <p className="eyebrow">01 Build</p>
+            <h3>Construct a living graph</h3>
+            <p className="subtle-copy">
+              Every project, endorsement, and skill link becomes connected signal instead of
+              isolated resume text.
+            </p>
+          </article>
+          <article className="panel landing-process__card">
+            <p className="eyebrow">02 Verify</p>
+            <h3>Trust by evidence</h3>
+            <p className="subtle-copy">
+              Artifact-backed nodes and peer endorsement trails increase confidence in every
+              recommendation.
+            </p>
+          </article>
+          <article className="panel landing-process__card">
+            <p className="eyebrow">03 Match</p>
+            <h3>Explain every score</h3>
+            <p className="subtle-copy">
+              Recruiter fit percentages are transparent, traceable, and grounded in graph
+              facts.
+            </p>
+          </article>
+        </div>
+      </section>
     </main>
   );
 };

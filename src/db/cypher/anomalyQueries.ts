@@ -3,7 +3,7 @@ MATCH (seed:User)
 WHERE seed.id IS NOT NULL
 WITH seed
 ORDER BY seed.id
-LIMIT $scanLimit
+LIMIT toInteger($scanLimit)
 MATCH (seed)-[:ENDORSED]->(:Endorsement)-[:TO_USER]->(peer:User)
 WITH seed, collect(DISTINCT peer) AS outboundPeers
 WHERE size(outboundPeers) >= $minOutDegree
@@ -22,7 +22,7 @@ RETURN candidateUserIds AS userIds,
        size(candidateUserIds) AS clusterSize,
        reciprocityRatio
 ORDER BY clusterSize DESC, reciprocityRatio DESC
-LIMIT $maxClusters
+LIMIT toInteger($maxClusters)
 `;
 
 export const CREATE_ANOMALY_FLAGS = `

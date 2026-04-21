@@ -25,6 +25,11 @@ router.post('/', async (req: Request, res: Response) => {
   }
 
   try {
+    const existingSkill = await SkillModel.findByName(parse.data.name);
+    if (existingSkill) {
+      return res.status(200).json(existingSkill);
+    }
+
     const skill = await SkillModel.create(parse.data);
     return res.status(201).json(skill);
   } catch (err: unknown) {

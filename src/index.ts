@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
 import { initDb } from './db/schema';
 import { closeDriver } from './db/neo4j';
 import usersRouter from './api/users/route';
@@ -9,6 +11,7 @@ import evidenceRouter from './api/evidence';
 import endorseRouter from './api/endorse';
 import recruiterSearchRouter from './api/recruiter/search';
 import assessmentRouter from './api/assessment/ingest';
+import { BackgroundJobRunner } from './services/reputation/backgroundJobs';
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
@@ -30,6 +33,25 @@ app.use('/api/endorse', endorseRouter);
 app.use('/api/recruiter', recruiterSearchRouter);
 app.use('/api/assessment', assessmentRouter);
 
+const uiBuildDirCandidates = [
+  path.resolve(process.cwd(), 'dist', 'recruiter-ui'),
+  path.resolve(__dirname, 'recruiter-ui'),
+];
+const uiBuildDir = uiBuildDirCandidates.find((candidate) =>
+  fs.existsSync(path.join(candidate, 'index.html'))
+);
+const uiIndexPath = uiBuildDir ? path.join(uiBuildDir, 'index.html') : '';
+const hasUiBuild = Boolean(uiBuildDir);
+
+if (hasUiBuild && uiBuildDir) {
+  app.use(express.static(uiBuildDir));
+
+  // Keep client-side routes working when the app is served by Express.
+  app.get(/^\/(?!api|health).*/, (_req, res) => {
+    res.sendFile(uiIndexPath);
+  });
+}
+
 // 404 handler for unmatched routes
 app.use((_req, res) => {
   res.status(404).json({ error: 'Not found' });
@@ -39,6 +61,9 @@ app.use((_req, res) => {
 export async function start(): Promise<void> {
   try {
     await initDb();
+    const backgroundJobs = new BackgroundJobRunner();
+    backgroundJobs.start();
+
     const server = app.listen(PORT, () => {
       console.log(`SkillGraph API running on http://localhost:${PORT}`);
     });
@@ -46,6 +71,7 @@ export async function start(): Promise<void> {
     // Graceful shutdown
     const shutdown = async (signal: string) => {
       console.log(`[${signal}] Shutting down...`);
+      backgroundJobs.stop();
       server.close(async () => {
         await closeDriver();
         console.log('Shutdown complete');

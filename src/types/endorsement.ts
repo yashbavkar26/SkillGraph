@@ -7,6 +7,8 @@ export interface Endorsement {
   skillId: string;
   timestamp: string;
   comment?: string;
+  weight?: number;
+  riskFlags?: string[];
 }
 
 export const EndorsementInputSchema = z.object({
