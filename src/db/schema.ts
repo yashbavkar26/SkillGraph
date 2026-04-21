@@ -1,64 +1,81 @@
 import 'dotenv/config';
-import { getDriver, verifyConnectivity, closeDriver } from './neo4j';
+import { closeDriver, getDriver, verifyConnectivity } from './neo4j';
 
 /**
  * Cypher statements that establish the core graph schema constraints.
  *
- * These are idempotent — safe to run multiple times. Using
- * `CREATE CONSTRAINT IF NOT EXISTS` prevents errors on re-initialization.
+ * These are idempotent and safe to run multiple times.
  */
 const CONSTRAINT_STATEMENTS: readonly string[] = [
-  // User node: email must be unique (core identity)
   `CREATE CONSTRAINT user_email_unique IF NOT EXISTS
    FOR (u:User) REQUIRE u.email IS UNIQUE`,
-
-  // User node: id must be unique (surrogate key)
   `CREATE CONSTRAINT user_id_unique IF NOT EXISTS
    FOR (u:User) REQUIRE u.id IS UNIQUE`,
-
-  // Skill node: name must be unique (canonical skills only)
   `CREATE CONSTRAINT skill_name_unique IF NOT EXISTS
    FOR (s:Skill) REQUIRE s.name IS UNIQUE`,
-
-  // Skill node: id must be unique (surrogate key)
   `CREATE CONSTRAINT skill_id_unique IF NOT EXISTS
    FOR (s:Skill) REQUIRE s.id IS UNIQUE`,
 ];
 
-/**
- * Apply all schema constraints to the Neo4j database.
- * Idempotent — safe to call on every startup.
- */
+async function verifyRecruiterSearchReadiness(): Promise<void> {
+  const session = getDriver().session();
+  try {
+    const gdsResult = await session.run(
+      `SHOW PROCEDURES YIELD name
+       WITH collect(name) AS names
+       RETURN any(name IN names WHERE name = 'gds.version') AS gdsAvailable`
+    );
+    const gdsAvailable = Boolean(gdsResult.records[0]?.get('gdsAvailable'));
+    if (!gdsAvailable) {
+      console.warn(
+        '[db] Recruiter search readiness: GDS procedure not found, using non-GDS similarity fallback.'
+      );
+    }
+
+    const vectorIndexResult = await session.run(
+      `SHOW INDEXES YIELD name, type
+       WHERE type = 'VECTOR'
+       RETURN count(*) AS vectorIndexCount`
+    );
+    const vectorIndexCount = Number(vectorIndexResult.records[0]?.get('vectorIndexCount') ?? 0);
+    if (vectorIndexCount === 0) {
+      console.warn(
+        '[db] Recruiter search readiness: no VECTOR index found, continuing with relational feature retrieval.'
+      );
+    }
+  } catch (error) {
+    console.warn(
+      '[db] Recruiter search readiness checks failed; continuing with safe fallback path.',
+      error
+    );
+  } finally {
+    await session.close();
+  }
+}
+
 export async function initializeSchema(): Promise<void> {
   const session = getDriver().session();
   try {
     for (const statement of CONSTRAINT_STATEMENTS) {
       await session.run(statement);
     }
-    console.log(`✓ Schema initialized — ${CONSTRAINT_STATEMENTS.length} constraints applied`);
+    console.log(`Schema initialized: ${CONSTRAINT_STATEMENTS.length} constraints applied`);
   } finally {
     await session.close();
   }
 }
 
-/**
- * Full database initialization sequence:
- * 1. Verify connectivity
- * 2. Apply schema constraints
- *
- * Call this once on application startup, or run directly via `npm run db:init`.
- */
 export async function initDb(): Promise<void> {
   console.log('[db] Verifying Neo4j connectivity...');
   await verifyConnectivity();
-  console.log('[db] Connected ✓');
+  console.log('[db] Connected');
 
   console.log('[db] Initializing schema...');
   await initializeSchema();
-  console.log('[db] Database ready ✓');
+  await verifyRecruiterSearchReadiness();
+  console.log('[db] Database ready');
 }
 
-// Allow running directly: `ts-node src/db/schema.ts`
 if (require.main === module) {
   initDb()
     .then(() => closeDriver())
