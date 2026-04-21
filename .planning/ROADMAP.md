@@ -45,7 +45,7 @@
 - [ ] Optimize graph queries and scaling for high concurrency.
 
 **Plans:** 4 plans
-- [ ] 04-01-PLAN.md — Advanced Reputation Engine (Algorithmic Core)
+- [x] 04-01-PLAN.md — Advanced Reputation Engine (Algorithmic Core)
 - [ ] 04-02-PLAN.md — Assessment Ingestion & Graph Linkage
 - [ ] 04-03-PLAN.md — Collusion Detection & Anomaly Monitoring
 - [ ] 04-04-PLAN.md — Graph Performance & Scale Optimization
