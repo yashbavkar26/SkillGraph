@@ -19,8 +19,7 @@ export interface Evidence {
   createdAt: string;
 }
 
-export const EvidenceSchema = z.object({
-  userId: z.string().uuid(),
+export const EvidenceInputSchema = z.object({
   skillId: z.string().uuid(),
   url: z.string().url(),
   type: z.enum(['github', 'portfolio', 'certificate', 'article', 'other']),
@@ -28,10 +27,12 @@ export const EvidenceSchema = z.object({
     description: z.string().optional(),
     externalId: z.string().optional(),
   }).catchall(z.any()),
-}).transform((data) => ({
-  ...data,
-  id: uuidv4(),
-  createdAt: new Date().toISOString(),
-}));
+});
 
-export type EvidenceInput = z.infer<typeof EvidenceSchema>;
+export type EvidenceInput = z.infer<typeof EvidenceInputSchema>;
+
+export const EvidenceSchema = EvidenceInputSchema.extend({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  createdAt: z.string().datetime(),
+});
