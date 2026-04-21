@@ -62,10 +62,15 @@ describe('Recruiter Search API Contract: Fit + Explainability', () => {
   });
 
   it('includes fitScore, scoreVersion, and structured non-empty explanations', async () => {
+    const explainabilityRequest = {
+      ...recruiterSearchRequestFixture,
+      filters: {},
+    };
+
     const response = await request(app)
       .post('/api/recruiter/search')
       .set('x-user-id', recruiterId)
-      .send(recruiterSearchRequestFixture);
+      .send(explainabilityRequest);
 
     expect(response.status).toBe(200);
     expect(response.body.scoreVersion).toBe(SCORE_VERSION);
