@@ -1,5 +1,8 @@
-import { getDriver } from '../../db/neo4j';
 import { RECRUITER_SEARCH } from '../../db/cypher/recruiterSearch';
+import {
+  QueryOverloadError,
+  performanceQueryOptimizer,
+} from '../performance/queryOptimizer';
 import type { RecruiterSearchRequest } from '../../types/recruiter/search';
 
 export type RecruiterCandidateFeatures = {
@@ -45,31 +48,40 @@ function asNumber(value: unknown): number {
 export async function retrieveRecruiterCandidates(
   input: RetrievalInput
 ): Promise<RecruiterCandidateFeatures[]> {
-  const session = getDriver().session();
-  try {
-    const filters = input.request.filters ?? {};
-    const result = await session.run(RECRUITER_SEARCH, {
-      recruiterId: input.recruiterId,
-      industriesLower: normalizeLowercase(filters.industries),
-      projectTypesLower: normalizeLowercase(filters.projectTypes),
-      requiredSkillIds: filters.requiredSkillIds ?? [],
-      topK: Math.trunc(Math.max(1, Math.min(input.request.topK, 50))),
-    });
+  const filters = input.request.filters ?? {};
+  const queryParams = {
+    recruiterId: input.recruiterId,
+    industriesLower: normalizeLowercase(filters.industries),
+    projectTypesLower: normalizeLowercase(filters.projectTypes),
+    requiredSkillIds: filters.requiredSkillIds ?? [],
+    topK: Math.trunc(Math.max(1, Math.min(input.request.topK, 50))),
+  };
 
-    return result.records.map((record) => ({
-      candidateId: record.get('candidateId'),
-      displayName: record.get('displayName'),
-      industries: (record.get('industries') ?? []) as string[],
-      projectTypes: (record.get('projectTypes') ?? []) as string[],
-      matchedSkillIds: (record.get('matchedSkillIds') ?? []) as string[],
-      matchedSkillCount: asNumber(record.get('matchedSkillCount')),
-      evidenceCount: asNumber(record.get('evidenceCount')),
-      endorsementCount: asNumber(record.get('endorsementCount')),
-      proficiencySum: asNumber(record.get('proficiencySum')),
-      graphSimilarity: asNumber(record.get('graphSimilarity')),
-    }));
-  } finally {
-    await session.close();
+  try {
+    return await performanceQueryOptimizer.executeCachedRead({
+      queryType: 'similarity',
+      cypher: RECRUITER_SEARCH,
+      params: queryParams,
+      mapResult: (records) =>
+        records.map((record) => ({
+          candidateId: record.get('candidateId'),
+          displayName: record.get('displayName'),
+          industries: (record.get('industries') ?? []) as string[],
+          projectTypes: (record.get('projectTypes') ?? []) as string[],
+          matchedSkillIds: (record.get('matchedSkillIds') ?? []) as string[],
+          matchedSkillCount: asNumber(record.get('matchedSkillCount')),
+          evidenceCount: asNumber(record.get('evidenceCount')),
+          endorsementCount: asNumber(record.get('endorsementCount')),
+          proficiencySum: asNumber(record.get('proficiencySum')),
+          graphSimilarity: asNumber(record.get('graphSimilarity')),
+        })),
+      cacheTtlMs: 30_000,
+    });
+  } catch (error) {
+    if (error instanceof QueryOverloadError || (error as Error).name === 'QueryOverloadError') {
+      return [];
+    }
+    throw error;
   }
 }
 
