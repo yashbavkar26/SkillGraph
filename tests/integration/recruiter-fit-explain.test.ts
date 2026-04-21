@@ -12,15 +12,27 @@ import {
 describe('Recruiter Search API Contract: Fit + Explainability', () => {
   const recruiterId = '98989898-9898-4989-8989-989898989898';
 
-  beforeAll(async () => {
+ beforeAll(async () => {
     await initDb();
     const session = getDriver().session();
     try {
       await session.run(
         `
         CREATE (:User {id: $recruiterId, email: $recruiterEmail, name: 'Recruiter Explainability Test'})
-        CREATE (:User {id: $highId, email: $highEmail, name: $highName})
-        CREATE (:User {id: $lowId, email: $lowEmail, name: $lowName})
+        CREATE (:User {
+          id: $highId, 
+          email: $highEmail, 
+          name: $highName,
+          industries: $highIndustries,
+          projectTypes: $highProjectTypes
+        })
+        CREATE (:User {
+          id: $lowId, 
+          email: $lowEmail, 
+          name: $lowName,
+          industries: $lowIndustries,
+          projectTypes: $lowProjectTypes
+        })
         `,
         {
           recruiterId,
@@ -28,9 +40,13 @@ describe('Recruiter Search API Contract: Fit + Explainability', () => {
           highId: highFitCandidateFixture.candidateId,
           highEmail: `high-fit-${highFitCandidateFixture.candidateId}@example.com`,
           highName: highFitCandidateFixture.displayName,
+          highIndustries: highFitCandidateFixture.industries, // Add this
+          highProjectTypes: highFitCandidateFixture.projectTypes, // Add this
           lowId: lowFitCandidateFixture.candidateId,
           lowEmail: `low-fit-${lowFitCandidateFixture.candidateId}@example.com`,
           lowName: lowFitCandidateFixture.displayName,
+          lowIndustries: lowFitCandidateFixture.industries, // Add this
+          lowProjectTypes: lowFitCandidateFixture.projectTypes, // Add this
         }
       );
     } finally {
