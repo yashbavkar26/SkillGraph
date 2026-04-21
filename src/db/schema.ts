@@ -22,8 +22,8 @@ async function verifyRecruiterSearchReadiness(): Promise<void> {
   try {
     const gdsResult = await session.run(
       `SHOW PROCEDURES YIELD name
-       WITH collect(name) AS names
-       RETURN any(name IN names WHERE name = 'gds.version') AS gdsAvailable`
+       WHERE name = 'gds.version'
+       RETURN count(name) > 0 AS gdsAvailable`
     );
     const gdsAvailable = Boolean(gdsResult.records[0]?.get('gdsAvailable'));
     if (!gdsAvailable) {

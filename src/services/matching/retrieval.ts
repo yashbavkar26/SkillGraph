@@ -53,7 +53,7 @@ export async function retrieveRecruiterCandidates(
       industriesLower: normalizeLowercase(filters.industries),
       projectTypesLower: normalizeLowercase(filters.projectTypes),
       requiredSkillIds: filters.requiredSkillIds ?? [],
-      topK: Math.max(1, Math.min(input.request.topK, 50)),
+      topK: Math.trunc(Math.max(1, Math.min(input.request.topK, 50))),
     });
 
     return result.records.map((record) => ({

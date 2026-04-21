@@ -61,5 +61,5 @@ RETURN
     ELSE (industryCoverage + projectCoverage) / 2.0
   END AS graphSimilarity
 ORDER BY matchedSkillCount DESC, endorsementCount DESC, evidenceCount DESC, candidateId ASC
-LIMIT $topK
+LIMIT toInteger($topK)
 `;
