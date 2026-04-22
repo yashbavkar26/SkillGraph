@@ -2,7 +2,7 @@ import neo4j, { Driver, Session, auth } from 'neo4j-driver';
 
 // Credentials are loaded from environment variables — never hardcode (T-01-01 mitigation)
 const NEO4J_URI = process.env.NEO4J_URI ?? 'bolt://localhost:7687';
-const NEO4J_USER = process.env.NEO4J_USER ?? 'neo4j';
+const NEO4J_USER = process.env.NEO4J_USER ?? process.env.NEO4J_USERNAME ?? 'neo4j';
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD ?? '';
 
 if (!NEO4J_PASSWORD) {
