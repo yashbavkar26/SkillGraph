@@ -14,8 +14,6 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "baseUrl": ".",
-    "ignoreDeprecations": "5.0",
     "paths": {
       "@db/*": ["src/db/*"],
       "@models/*": ["src/models/*"],
