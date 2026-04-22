@@ -15,7 +15,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "moduleResolution": "node",
-    "types": ["node", "jest", "express", "cors", "uuid"],
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@db/*": ["./src/db/*"],
       "@models/*": ["./src/models/*"],
