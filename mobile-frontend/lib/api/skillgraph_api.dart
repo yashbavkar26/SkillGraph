@@ -308,10 +308,12 @@ class SkillGraphApi {
       body: jsonEncode({
         'query': query,
         'topK': topK,
-        'industries': industries,
-        'projectTypes': projectTypes,
-        'requiredSkillIds': requiredSkillIds,
-        'minFitScore': minFitScore,
+        'filters': {
+          'industries': industries,
+          'projectTypes': projectTypes,
+          'requiredSkillIds': requiredSkillIds,
+          'minFitScore': minFitScore,
+        },
         'includeExplanation': includeExplanation,
       }),
     );
