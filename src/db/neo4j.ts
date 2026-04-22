@@ -20,12 +20,14 @@ let _driver: Driver | null = null;
 
 export function getDriver(): Driver {
   if (!_driver) {
+    console.log(`[neo4j] Attempting connection to ${NEO4J_URI} as user: ${NEO4J_USER}`);
+    
     _driver = neo4j.driver(
       NEO4J_URI,
       auth.basic(NEO4J_USER, NEO4J_PASSWORD),
       {
         maxConnectionPoolSize: 50,
-        connectionAcquisitionTimeout: 10_000, // ms
+        connectionAcquisitionTimeout: 20_000, // Increased timeout for cloud
         logging: {
           level: 'warn',
           logger: (level, message) => {
