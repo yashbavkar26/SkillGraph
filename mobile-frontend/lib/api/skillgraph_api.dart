@@ -137,6 +137,21 @@ class SkillGraphApi {
     return GraphUser.fromJson(await _decodeObject(response));
   }
 
+  /// Administrative user creation (POST /api/users)
+  Future<GraphUser> createNewUser({
+    required String name,
+    required String email,
+    String? role,
+  }) async {
+    final response = await _client.post(
+      _uri('/api/users'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'name': name, 'email': email, 'role': role}),
+    );
+    if (response.statusCode != 201) throw _error(response);
+    return GraphUser.fromJson(await _decodeObject(response));
+  }
+
   Future<GraphSkill> createSkill({
     required String name,
     String? category,
