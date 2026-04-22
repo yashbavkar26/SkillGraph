@@ -68,27 +68,22 @@ class SkillGraphApi {
   }
 
   Future<HealthResponse> fetchHealth() async {
-    return HealthResponse(
-      status: 'ok (mock)',
-      timestamp: DateTime.now().toIso8601String(),
-    );
+    final response = await _client.get(_uri('/health'));
+    if (response.statusCode != 200) throw _error(response);
+    return HealthResponse.fromJson(await _decodeObject(response));
   }
 
   Future<LoginResponse> login({
     required String email,
     required String role,
   }) async {
-    // Dummy login: Accept any credentials
-    return LoginResponse(
-      user: GraphUser(
-        id: 'user-dummy-123',
-        email: email,
-        name: 'Demo User',
-        role: role,
-        createdAt: DateTime.now().toIso8601String(),
-      ),
-      isNewUser: false,
+    final response = await _client.post(
+      _uri('/api/users/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'role': role}),
     );
+    if (response.statusCode != 200) throw _error(response);
+    return LoginResponse.fromJson(await _decodeObject(response));
   }
 
   Future<LoginResponse> register({
@@ -96,17 +91,13 @@ class SkillGraphApi {
     required String email,
     required String role,
   }) async {
-    // Dummy register: Accept any credentials
-    return LoginResponse(
-      user: GraphUser(
-        id: 'user-dummy-123',
-        email: email,
-        name: name,
-        role: role,
-        createdAt: DateTime.now().toIso8601String(),
-      ),
-      isNewUser: true,
+    final response = await _client.post(
+      _uri('/api/users/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'name': name, 'email': email, 'role': role}),
     );
+    if (response.statusCode != 200) throw _error(response);
+    return LoginResponse.fromJson(await _decodeObject(response));
   }
 
   Future<GraphUser> createUser({
@@ -114,13 +105,14 @@ class SkillGraphApi {
     required String email,
     String? role,
   }) async {
-    return GraphUser(
-      id: 'user-${DateTime.now().millisecondsSinceEpoch}',
-      email: email,
-      name: name,
-      role: role,
-      createdAt: DateTime.now().toIso8601String(),
+    final response = await _client.post(
+      _uri('/api/users/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'name': name, 'email': email, 'role': role ?? 'candidate'}),
     );
+    if (response.statusCode != 200) throw _error(response);
+    final body = await _decodeObject(response);
+    return GraphUser.fromJson(body['user'] as Map<String, dynamic>);
   }
 
   Future<List<GraphUser>> searchUsers({
@@ -128,87 +120,61 @@ class SkillGraphApi {
     String? role,
     int? limit,
   }) async {
-    return [
-      GraphUser(
-        id: 'user-1',
-        email: 'alice@example.com',
-        name: 'Alice Smith',
-        role: 'Developer',
-        createdAt: DateTime.now().toIso8601String(),
-      ),
-      GraphUser(
-        id: 'user-2',
-        email: 'bob@example.com',
-        name: 'Bob Johnson',
-        role: 'Designer',
-        createdAt: DateTime.now().toIso8601String(),
-      ),
-    ];
+    final queryParams = <String, String>{};
+    if (query != null) queryParams['query'] = query;
+    if (role != null) queryParams['role'] = role;
+    if (limit != null) queryParams['limit'] = limit.toString();
+
+    final response = await _client.get(_uri('/api/users', queryParams));
+    if (response.statusCode != 200) throw _error(response);
+    final list = await _decodeList(response);
+    return list.map((e) => GraphUser.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<GraphUser> fetchUser(String userId) async {
-    return GraphUser(
-      id: userId,
-      email: 'demo@skillgraph.ai',
-      name: 'Demo User',
-      role: 'Full Stack Developer',
-      createdAt: DateTime.now().toIso8601String(),
-    );
+    final response = await _client.get(_uri('/api/users/${Uri.encodeComponent(userId)}'));
+    if (response.statusCode != 200) throw _error(response);
+    return GraphUser.fromJson(await _decodeObject(response));
   }
 
   Future<GraphSkill> createSkill({
     required String name,
     String? category,
   }) async {
-    return GraphSkill(
-      id: 'skill-${DateTime.now().millisecondsSinceEpoch}',
-      name: name,
-      category: category,
-      createdAt: DateTime.now().toIso8601String(),
+    final response = await _client.post(
+      _uri('/api/skills'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'name': name, 'category': category}),
     );
+    if (response.statusCode != 200) throw _error(response);
+    return GraphSkill.fromJson(await _decodeObject(response));
   }
 
   Future<List<GraphSkill>> fetchAllSkills() async {
-    return [
-      GraphSkill(id: 's1', name: 'Flutter', category: 'Mobile', createdAt: '2024-01-01'),
-      GraphSkill(id: 's2', name: 'TypeScript', category: 'Web', createdAt: '2024-01-01'),
-      GraphSkill(id: 's3', name: 'Neo4j', category: 'Database', createdAt: '2024-01-01'),
-      GraphSkill(id: 's4', name: 'Node.js', category: 'Backend', createdAt: '2024-01-01'),
-      GraphSkill(id: 's5', name: 'React', category: 'Frontend', createdAt: '2024-01-01'),
-    ];
+    final response = await _client.get(_uri('/api/skills'));
+    if (response.statusCode != 200) throw _error(response);
+    final list = await _decodeList(response);
+    return list.map((e) => GraphSkill.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<GraphSkill> fetchSkillById(String skillId) async {
-    return GraphSkill(
-      id: skillId,
-      name: 'Sample Skill',
-      category: 'General',
-      createdAt: '2024-01-01',
-    );
+    final response = await _client.get(_uri('/api/skills/${Uri.encodeComponent(skillId)}'));
+    if (response.statusCode != 200) throw _error(response);
+    return GraphSkill.fromJson(await _decodeObject(response));
   }
 
   Future<List<SkillHistoryEvent>> fetchSkillHistory(String skillId) async {
-    return [
-      SkillHistoryEvent(
-        id: 'h1',
-        type: 'ENDORSEMENT',
-        detail: 'Endorsed by Bob',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
-      ),
-      SkillHistoryEvent(
-        id: 'h2',
-        type: 'EVIDENCE',
-        detail: 'Added GitHub Project',
-        timestamp: DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
-      ),
-    ];
+    final response = await _client.get(_uri('/api/skills/${Uri.encodeComponent(skillId)}/history'));
+    if (response.statusCode != 200) throw _error(response);
+    final list = await _decodeList(response);
+    return list.map((e) => SkillHistoryEvent.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<List<UserSkillLink>> fetchUserSkillLinks(String userId) async {
-    return [
-      UserSkillLink(userId: userId, skillId: 's1', proficiency: 5, createdAt: '2024-01-01'),
-      UserSkillLink(userId: userId, skillId: 's2', proficiency: 4, createdAt: '2024-01-01'),
-    ];
+    final response = await _client.get(_uri('/api/relationships/users/${Uri.encodeComponent(userId)}/skills'));
+    if (response.statusCode != 200) throw _error(response);
+    final list = await _decodeList(response);
+    return list.map((e) => UserSkillLink.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<void> addUserSkill({
@@ -216,7 +182,12 @@ class SkillGraphApi {
     required String skillId,
     int proficiency = 3,
   }) async {
-    // Do nothing in dummy mode
+    final response = await _client.post(
+      _uri('/api/relationships'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'userId': userId, 'skillId': skillId, 'proficiency': proficiency}),
+    );
+    if (response.statusCode != 200) throw _error(response);
   }
 
   Future<EvidenceRecord> createEvidence({
@@ -226,29 +197,28 @@ class SkillGraphApi {
     required String type,
     Map<String, dynamic>? metadata,
   }) async {
-    return EvidenceRecord(
-      id: 'ev-${DateTime.now().millisecondsSinceEpoch}',
-      userId: actorUserId,
-      skillId: skillId,
-      url: url,
-      type: type,
-      metadata: metadata ?? {},
-      createdAt: DateTime.now().toIso8601String(),
+    final response = await _client.post(
+      _uri('/api/evidence'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': actorUserId,
+      },
+      body: jsonEncode({
+        'skillId': skillId,
+        'url': url,
+        'type': type,
+        'metadata': metadata ?? {},
+      }),
     );
+    if (response.statusCode != 200) throw _error(response);
+    return EvidenceRecord.fromJson(await _decodeObject(response));
   }
 
   Future<List<EvidenceRecord>> fetchEvidenceForUser(String userId) async {
-    return [
-      EvidenceRecord(
-        id: 'ev1',
-        userId: userId,
-        skillId: 's1',
-        url: 'https://github.com/demo/project',
-        type: 'github_repo',
-        metadata: {'stars': 10},
-        createdAt: '2024-01-10',
-      ),
-    ];
+    final response = await _client.get(_uri('/api/evidence/${Uri.encodeComponent(userId)}'));
+    if (response.statusCode != 200) throw _error(response);
+    final list = await _decodeList(response);
+    return list.map((e) => EvidenceRecord.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<EndorsementRecord> createEndorsement({
@@ -257,34 +227,29 @@ class SkillGraphApi {
     required String skillId,
     String? comment,
   }) async {
-    return EndorsementRecord(
-      id: 'en-${DateTime.now().millisecondsSinceEpoch}',
-      endorserId: endorserId,
-      recipientId: recipientId,
-      skillId: skillId,
-      timestamp: DateTime.now().toIso8601String(),
-      comment: comment,
-      weight: 1.0,
-      riskFlags: [],
+    final response = await _client.post(
+      _uri('/api/endorse'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': endorserId,
+      },
+      body: jsonEncode({
+        'recipientId': recipientId,
+        'skillId': skillId,
+        'comment': comment,
+      }),
     );
+    if (response.statusCode != 200) throw _error(response);
+    return EndorsementRecord.fromJson(await _decodeObject(response));
   }
 
   Future<List<EndorsementRecord>> fetchEndorsementsForUser(
     String userId,
   ) async {
-    return [
-      EndorsementRecord(
-        id: 'en1',
-        endorserId: 'user-2',
-        recipientId: userId,
-        skillId: 's1',
-        timestamp: '2024-01-15',
-        comment: 'Great work on the mobile app!',
-        weight: 1.2,
-        riskFlags: [],
-        skill: const EndorsementSkill(id: 's1', name: 'Flutter'),
-      ),
-    ];
+    final response = await _client.get(_uri('/api/endorse/${Uri.encodeComponent(userId)}'));
+    if (response.statusCode != 200) throw _error(response);
+    final list = await _decodeList(response);
+    return list.map((e) => EndorsementRecord.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<AssessmentRecord> ingestAssessment({
@@ -294,15 +259,19 @@ class SkillGraphApi {
     required String timestamp,
     required String source,
   }) async {
-    return AssessmentRecord(
-      id: 'as-${DateTime.now().millisecondsSinceEpoch}',
-      userId: userId,
-      skillId: skillId,
-      score: score.toDouble(),
-      timestamp: timestamp,
-      source: source,
-      createdAt: DateTime.now().toIso8601String(),
+    final response = await _client.post(
+      _uri('/api/assessment/ingest'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': userId,
+        'skillId': skillId,
+        'score': score,
+        'timestamp': timestamp,
+        'source': source,
+      }),
     );
+    if (response.statusCode != 200) throw _error(response);
+    return AssessmentRecord.fromJson(await _decodeObject(response));
   }
 
   Future<RecruiterSearchResponse> recruiterSearch({
@@ -315,30 +284,24 @@ class SkillGraphApi {
     double? minFitScore,
     bool includeExplanation = true,
   }) async {
-    return RecruiterSearchResponse(
-      scoreVersion: 'v1-mock',
-      tookMs: 12,
-      total: 1,
-      candidates: [
-        RecruiterCandidateResult(
-          candidateId: 'user-dummy-123',
-          displayName: 'Demo User',
-          fitScore: 0.95,
-          scoreVersion: 'v1-mock',
-          explanationAtoms: [
-            RecruiterExplanationAtom(
-              type: 'SKILL',
-              label: 'Flutter',
-              value: 'Expert',
-              contribution: 0.6,
-            ),
-          ],
-          matchedSkillIds: ['s1', 's2'],
-          industries: industries ?? ['Tech'],
-          projectTypes: projectTypes ?? ['Mobile'],
-        ),
-      ],
+    final response = await _client.post(
+      _uri('/api/recruiter/search'),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': recruiterId,
+      },
+      body: jsonEncode({
+        'query': query,
+        'topK': topK,
+        'industries': industries,
+        'projectTypes': projectTypes,
+        'requiredSkillIds': requiredSkillIds,
+        'minFitScore': minFitScore,
+        'includeExplanation': includeExplanation,
+      }),
     );
+    if (response.statusCode != 200) throw _error(response);
+    return RecruiterSearchResponse.fromJson(await _decodeObject(response));
   }
 
   void close() {

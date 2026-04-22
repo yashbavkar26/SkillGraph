@@ -15,7 +15,8 @@ class AppConfig {
         : _apiBaseUrlFromDefine,
   );
 
-  static String fallbackApiBaseUrl() => 'http://localhost:3000';
+  // Fallback for when no --dart-define is provided
+  static String fallbackApiBaseUrl() => 'https://skillgraph-fe2r.onrender.com';
 
   static String normalizeBaseUrl(String rawValue) {
     final trimmed = rawValue.trim();
