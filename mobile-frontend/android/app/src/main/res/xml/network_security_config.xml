@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Dev-only: allow HTTP API hosts like LAN IPs (192.168.x.x) without TLS. -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { initDb } from './db/schema';
@@ -15,6 +16,9 @@ import { BackgroundJobRunner } from './services/reputation/backgroundJobs';
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
+
+// Enable CORS for all origins (can be restricted in production)
+app.use(cors());
 
 // Parse JSON request bodies
 app.use(express.json());
