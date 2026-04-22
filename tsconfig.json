@@ -15,10 +15,10 @@
     "declarationMap": true,
     "sourceMap": true,
     "paths": {
-      "@db/*": ["src/db/*"],
-      "@models/*": ["src/models/*"],
-      "@types/*": ["src/types/*"],
-      "@api/*": ["src/api/*"]
+      "@db/*": ["./src/db/*"],
+      "@models/*": ["./src/models/*"],
+      "@types/*": ["./src/types/*"],
+      "@api/*": ["./src/api/*"]
     }
   },
   "include": ["src/**/*", "tests/**/*", "vite.config.ts"],
